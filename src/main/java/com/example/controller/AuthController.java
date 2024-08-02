@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +34,15 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @GetMapping("/me")
+    public ResponseEntity<User> getUser(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByUsername(userDetails.getUsername());
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(404).build();
+        }
+    }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         Optional<User> existingUser = Optional.ofNullable(userRepository.findByUsername(user.getUsername()));
